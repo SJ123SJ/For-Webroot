@@ -1,0 +1,146 @@
+README by Jeff Swartz  10/21/2019
+email: swartz_jeff@yahoo.com
+
+Description: Authentication experience code exercise.
+
+The code for this exercise is split into two utilities.  The first utility
+will allow a user to create and/or maintain a list of customer records.
+Each record consists of a record number, a first and a last name, a salt
+value, a hashed password, and an encrypted secret message.
+
+The second utility will decrypt and display a customers encrypted secret
+message if the user has the proper credentials to successfully sign-in.
+
+The code was written and compiled using gcc version 7.4.0 under cygwin v2.897 x64 on a Windows 10 PC.
+$ uname -a
+CYGWIN_NT-10.0 SJPC2018 3.0.7(0.338/5/3) 2019-04-30 18:08 x86_64 Cygwin
+
+--------------------------------------------------------------------------------
+Compile/Link
+$ make
+g++ -c -Wall -O2 custmgmt.cpp
+g++ -c -Wall -O2 customerReadFromFile.cpp
+g++ -c -Wall -O2 customer.cpp
+g++ -c -Wall -O2 sha256.cpp
+g++ -c -Wall -O2 salt.cpp
+g++ -c -Wall -O2 mgmtMenu.cpp
+g++ -c -Wall -O2 mgmtActions.cpp
+g++ -c -Wall -O2 termio.cpp
+g++ -o custmgmt -Wall -O2 custmgmt.o customerReadFromFile.o customer.o sha256.o salt.o mgmtMenu.o mgmtActions.o termio.o
+g++ -c -Wall -O2 getsecret.cpp
+g++ -o getsecret -Wall -O2 getsecret.o customerReadFromFile.o customer.o sha256.o salt.o
+g++ -c -Wall -O2 testcode.cpp
+g++ -o testcode -Wall -O2 testcode.o customerReadFromFile.o customer.o salt.o
+
+--------------------------------------------------------------------------------
+Running the code example
+
+Start the customer manager and use the menu and prompts to create new customers.
+Save your customer data and exit the program as shown below:
+
+$ ./custmgmt test create
+
+Creating new customer file
+
+Select An Option:
+a) Add a new customer
+r) Remove a customer
+s) Save changes
+e) Exit
+Enter a, r, s, e: a
+Enter the first name of the new customer (no spaces): Joe
+Enter the last name of the new customer (no spaces): Smith
+Enter a password for the new customer (no spaces): 1234
+Enter a secret message (4 char min): The number 42 is the answer!!
+
+Select An Option:
+a) Add a new customer
+r) Remove a customer
+s) Save changes
+e) Exit
+Enter a, r, s, e: s
+
+Creating new customer list: 'test'
+
+Select An Option:
+a) Add a new customer
+r) Remove a customer
+s) Save changes
+e) Exit
+Enter a, r, s, e: e
+
+Program Completed
+
+$ ls -lat test
+-rw-r--r-- 1 SJ None 125 Oct 21 17:08 test
+
+$ cat test
+1
+Joe
+Smith
+K$yDEGLzcVkHdWr$
+014620b275d35727c8bd17a1e15570b182e897ac4656bffbd71bef31401afbad
+9=j?-'3=8qlxq19q,"4x+?+=4*kp
+
+
+$ ./getsecret test
+
+Opening customer list: 'test'
+The customer list contains 1 customers:
+
+<<Enter sign-in credentials>>
+Enter last name: SmitH
+Enter password: 1234
+
+Login Successful
+Your secret message is: The number 42 is the answer!!
+Program Completed
+
+
+--------------------------------------------------------------------------------
+Design considerations:
+1) The customer record file contains mostly ASCII readable characters.  This
+   made it easy to create record files for testing with a text editor during
+   early stages of the development process.  In later development, the encrypt
+   function was seen to produce unprintable characters due to the nature of
+   XOR. This code was left as is since later development code had the ability
+   to generate more advanced records.
+
+2) Each record could have a CRC generated across it and saved to the
+   customer file. This would help to insure that a record hasn't been
+   corrupted.
+
+--------------------------------------------------------------------------------
+Security considerations:
+1) Initially I was going to encrypt/decrypt the customer records using
+   'cryptopp', but it was overkill and not lightweight enough for this
+   coding exercise.  Instead I did the following:
+
+   When a new user is created:
+    Generate a random salt,
+    Append the salt value to the new customer's password,
+    Hash the combination of password and salt with SHA256,
+    Store the hashed value and the salt in the customer list.
+
+   When a user attempts to sign-in, password authentication is as follows:
+    Load the salt value associated with the username from the customer list.
+    Append the salt to the newly supplied password.
+    Hash the combination and compare the combo to the hash in the customer list.
+    If they're different, sign-in fails.
+
+2) The sign-in password is visible as the user types.  I wanted to switch the
+   terminal to noncanonical mode and echo password characters to the terminal
+   as '*'. I played around with this for awhile, but could not get it fully
+   functional and ended up reverting back to standard canonical mode.
+
+--------------------------------------------------------------------------------
+What was tested:
+ Insufficient or too many command line arguments provided to program
+ Unable to open a customer file
+ Customer files with corrupted records
+ The Makefile has a DEBUG flag which was enabled to instrument the customer
+ file contents.
+ Experimented with many many different input requests and different customer
+ files to verify proper results.
+ Overall, I tried to test every path in the code for correct execution.
+

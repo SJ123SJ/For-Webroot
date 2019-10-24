@@ -7,6 +7,8 @@
 #include "misc.h"            // Function protos
 #include "sha256.h"          // SHA256 cryptographic hash
 
+#include <unistd.h>
+#include <termios.h>
 bool login( std::vector<Customer> & customerListVec, size_t *vecId );
 
 /*----------------------------------------------------------------------------*
@@ -98,7 +100,8 @@ int main( int argc, char *argv[] )
 *   true               The user is authentic.
 *   vecId              The vector index addresses the users info.
 *
-*   false              The user name/password was incorrect.
+*   false              The user name/password was incorrect or could not be
+*                      obtained from the terminal or ESC was pressed.
 *   vecId              The vector index is not modified.
 *-----------------------------------------------------------------------------*/
 bool login( std::vector<Customer> & customerListVec, size_t *vecId )
@@ -110,12 +113,15 @@ bool login( std::vector<Customer> & customerListVec, size_t *vecId )
 
    std::cout << std::endl << "<<Enter sign-in credentials>>";
    std::cout << std::endl << "Enter first name: ";
-   std::cin >> firstName;
+   if( !getInput( firstName, false ) )
+     return false;
    std::cout << "Enter last name: ";
-   std::cin >> lastName;
+   if( !getInput( lastName, false ) )
+     return false;
 
    std::cout << "Enter password: ";
-   std::cin >> password;
+   if( !getInput( password, true ) )
+     return false;
 
    bool found = false;
    Customer temp;
@@ -147,3 +153,5 @@ bool login( std::vector<Customer> & customerListVec, size_t *vecId )
    *vecId = ix;
    return true;
 }
+
+

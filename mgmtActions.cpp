@@ -41,36 +41,54 @@ void customerAdd( std::vector<Customer> & customerListVec )
       recNumVal++;
    }
 
-   // Create the new customer record fill in the members.
+   // Create the new customer record and fill in the members.
    Customer newCustomer;
    newCustomer.setRecordNumber( std::to_string( recNumVal )  );
 
-   std::string tmpStr;
+   std::string firstName;
    std::cout << std::endl << "Enter the first name of the new customer (no spaces): ";
-   std::cin >> tmpStr;
-   newCustomer.setFirstName( tmpStr );
+   if( !getInput( firstName, false ) )
+     return;
+   newCustomer.setFirstName( firstName );
 
+   std::string lastName;
    std::cout << "Enter the last name of the new customer (no spaces): ";
-   std::cin >> tmpStr;
-   newCustomer.setLastName( tmpStr );
+   if( !getInput( lastName, false ) )
+     return;
+   newCustomer.setLastName( lastName );
 
+   // Check for a duplicate user
+   Customer temp;
+   for( size_t ix=0; ix < customerListVec.size(); ix++ )
+   {
+      temp = customerListVec.at( ix );
+      if( strcasecmp( firstName.c_str(), temp.getFirstName().c_str() ) == 0
+       &&
+          strcasecmp( lastName.c_str(), temp.getLastName().c_str() ) == 0 )
+      {
+          // A match was found!
+          std::cout << std::endl << "==> A user with this name already exists!" << std::endl;
+          return;
+      }
+   }
+
+   std::string passWord;
    std::cout << "Enter a password for the new customer (no spaces): ";
-   std::cin >> tmpStr;
+   if( !getInput( passWord, true ) )
+     return;
+
    std::string salt;
    genRandomSalt( salt );
    newCustomer.setSalt( salt );
-   std::string combo( tmpStr + salt );
+   std::string combo( passWord + salt );
    std::string hashed = sha256( combo );
    newCustomer.setPasswordHash( hashed );
 
-   // Make sure the user enters a secret message.
-   do
-   {
-      std::cin.ignore( 256, '\n' );
-      std::cout << "Enter a secret message (4 char min): ";
-      std::getline( std::cin, tmpStr );
-   } while( tmpStr.size() < 4 );
-   newCustomer.setSecretMsg( encryptDecrypt( tmpStr ) );
+   std::string secretMsg;
+   std::cout << "Enter a secret message: ";
+   if( !getInput( secretMsg, false ) )
+     return;
+   newCustomer.setSecretMsg( encryptDecrypt( secretMsg ) );
 
    customerListVec.push_back( newCustomer );
    return;

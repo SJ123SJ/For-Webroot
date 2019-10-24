@@ -1,12 +1,13 @@
-README by Jeff Swartz  10/21/2019
+README by Jeff Swartz  10/24/2019  *Updated*
 email: swartz_jeff@yahoo.com
 
 Description: Authentication experience code exercise.
 
-The code for this exercise is split into two utilities.  The first utility
-will allow a user to create and/or maintain a list of customer records.
-Each record consists of a record number, a first and a last name, a salt
-value, a hashed password, and an encrypted secret message.
+The code for this exercise is split into two utilities and a test module.
+The first utility will allow a user to create and/or maintain a list of
+customer records.  Each record consists of a record number, a first and a
+last name, a salt value, a hashed password, and an encrypted secret
+message.
 
 The second utility will decrypt and display a customers encrypted secret
 message if the user has the proper credentials to successfully sign-in.
@@ -33,10 +34,12 @@ g++ -c -Wall -O2 testcode.cpp
 g++ -o testcode -Wall -O2 testcode.o customerReadFromFile.o customer.o salt.o
 
 --------------------------------------------------------------------------------
-Running the code example
+Running the code
 
 Start the customer manager and use the menu and prompts to create new customers.
-Save your customer data and exit the program as shown below:
+Save the customer data and exit the program.  Run the getsecret program.
+
+A full example is shown below:
 
 $ ./custmgmt test create
 
@@ -50,8 +53,8 @@ e) Exit
 Enter a, r, s, e: a
 Enter the first name of the new customer (no spaces): Joe
 Enter the last name of the new customer (no spaces): Smith
-Enter a password for the new customer (no spaces): 1234
-Enter a secret message (4 char min): The number 42 is the answer!!
+Enter a password for the new customer (no spaces): ****
+Enter a secret message: The number 42 is the answer!!
 
 Select An Option:
 a) Add a new customer
@@ -110,6 +113,10 @@ Design considerations:
    customer file. This would help to insure that a record hasn't been
    corrupted.
 
+3) I added a terminal input handler that nicely supports acquiring regular
+   text as well as password text better than cin, but there wasn't time to
+   support more complex scenarios arising from the use of keypads.
+
 --------------------------------------------------------------------------------
 Security considerations:
 1) Initially I was going to encrypt/decrypt the customer records using
@@ -128,10 +135,9 @@ Security considerations:
     Hash the combination and compare the combo to the hash in the customer list.
     If they're different, sign-in fails.
 
-2) The sign-in password is visible as the user types.  I wanted to switch the
-   terminal to noncanonical mode and echo password characters to the terminal
-   as '*'. I played around with this for awhile, but could not get it fully
-   functional and ended up reverting back to standard canonical mode.
+2) I could have added a two-factor authentication such as a challenge question
+   to validate the user's identity. This would have introduced an inconvenience
+   into the login process.
 
 --------------------------------------------------------------------------------
 What was tested:
@@ -142,5 +148,6 @@ What was tested:
  file contents.
  Experimented with many many different input requests and different customer
  files to verify proper results.
+ Duplicate user names won't be accepted.
  Overall, I tried to test every path in the code for correct execution.
 

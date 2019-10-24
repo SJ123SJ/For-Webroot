@@ -1,7 +1,7 @@
 all: custmgmt getsecret testcode
 
 objects1 = custmgmt.o customerReadFromFile.o customer.o sha256.o salt.o mgmtMenu.o mgmtActions.o termio.o
-objects2 = getsecret.o customerReadFromFile.o customer.o sha256.o salt.o
+objects2 = getsecret.o customerReadFromFile.o customer.o sha256.o salt.o termio.o
 objects3 = testcode.o customerReadFromFile.o customer.o sha256.o salt.o
 
 #########################################################

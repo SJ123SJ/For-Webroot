@@ -22,7 +22,6 @@
 void mgmtMenu( std::string pathName, std::vector<Customer> & customerListVec )
 {
     char choice;
-    struct termios t_saved;
 
     while( true )
     {
@@ -35,16 +34,8 @@ void mgmtMenu( std::string pathName, std::vector<Customer> & customerListVec )
 
         // Read a single character from the keyboard and display it
         // immediately on the output screen without waiting for the enter key.
-        if( !setTermToSingleChar( &t_saved ) )
-        {
-            return;
-        }
-        std::cin >> choice;
-        std::cout << choice;
-        if( !restoreTermMode( &t_saved ) )
-        {
-            return;
-        }
+        if( !getch( &choice, true ) )
+          return;
 
         switch( choice )
         {
@@ -61,6 +52,7 @@ void mgmtMenu( std::string pathName, std::vector<Customer> & customerListVec )
               break;
 
            case 'e':
+           case  27:    /// ESC was pressed, exit
               return;
 
            default:
